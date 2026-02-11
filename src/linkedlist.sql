@@ -11,11 +11,31 @@ AS
 	TYPE t_storage
 	IS
 	TABLE OF t_node INDEX BY PLS_INTEGER;
+
+	PROCEDURE print_list_values(nodes IN t_storage,
+				    head IN PLS_INTEGER);
+END;
+/
+
+CREATE OR REPLACE PACKAGE BODY linked_list
+AS
+	PROCEDURE print_list_values(nodes IN t_storage,
+				    head IN PLS_INTEGER)
+	IS
+		v_index PLS_INTEGER;
+	BEGIN
+		v_index := head;
+
+		WHILE nodes.EXISTS(v_index)
+		LOOP
+			DBMS_OUTPUT.PUT_LINE(nodes(v_index).value);
+			v_index := nodes(v_index).next;
+		END LOOP;
+	END;
 END;
 /
 
 DECLARE
-
 	g_nodes linked_list.t_storage;
 	g_head PLS_INTEGER := NULL;
 	g_free PLS_INTEGER := 0;
@@ -33,14 +53,7 @@ BEGIN
 
 	DBMS_OUTPUT.PUT_LINE(g_nodes.COUNT);
 
-	v_index := g_head;
-
-	WHILE g_nodes.EXISTS(v_index)
-	LOOP
-		DBMS_OUTPUT.PUT_LINE(g_nodes(v_index).value);
-		v_index := g_nodes(v_index).next;
-	END LOOP;
-
+	linked_list.print_list_values(g_nodes, g_head);
 END;
 /
 
