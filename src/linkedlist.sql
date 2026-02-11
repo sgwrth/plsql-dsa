@@ -1,4 +1,5 @@
-DECLARE
+CREATE OR REPLACE PACKAGE linked_list
+AS
 	TYPE t_node
 	IS
 	RECORD (
@@ -10,9 +11,12 @@ DECLARE
 	TYPE t_storage
 	IS
 	TABLE OF t_node INDEX BY PLS_INTEGER;
+END;
+/
 
+DECLARE
 
-	g_nodes t_storage;
+	g_nodes linked_list.t_storage;
 	g_head PLS_INTEGER := NULL;
 	g_free PLS_INTEGER := 0;
 	v_index PLS_INTEGER;
