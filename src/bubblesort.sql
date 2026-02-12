@@ -1,25 +1,45 @@
+CREATE OR REPLACE TYPE t_number_list AS TABLE OF NUMBER;
+/
+CREATE OR REPLACE PACKAGE bubblesort
+IS
+	PROCEDURE print_values(numbers IN t_number_list);
+END;
+/
+
+CREATE OR REPLACE PACKAGE BODY bubblesort
+IS
+	PROCEDURE print_values(numbers IN t_number_list)
+	AS
+	BEGIN
+		FOR i IN 1..numbers.COUNT
+		LOOP
+			dbms_output.put_line(numbers(i));
+		END LOOP;
+	END;
+END;
+/
+
 DECLARE
-	TYPE type_va_numbers IS VARRAY(10) OF PLS_INTEGER;
-	va_numbers type_va_numbers := TYPE_VA_NUMBERS(5, 2, 7, 0, 3, 4, 1, 9, 8, 6);
+	v_numbers t_number_list;
 	v_temp PLS_INTEGER;
 BEGIN
-	FOR i IN 1..va_numbers.count
+	SELECT DISTINCT salary BULK COLLECT INTO v_numbers FROM hr.employees;
+
+	bubblesort.print_values(v_numbers);
+
+	FOR i IN 1..v_numbers.COUNT
 	LOOP
-		FOR j IN 1..(va_numbers.count - 1)
+		FOR j IN 1..(v_numbers.COUNT - 1)
 		LOOP
-			IF va_numbers(j) > va_numbers(j + 1)
+			IF v_numbers(j) > v_numbers(j + 1)
 			THEN
-				v_temp := va_numbers(j);
-				va_numbers(j) := va_numbers(j + 1);
-				va_numbers(j + 1) := v_temp;
+				v_temp := v_numbers(j);
+				v_numbers(j) := v_numbers(j + 1);
+				v_numbers(j + 1) := v_temp;
 			END IF;
 		END LOOP;
 	END LOOP;
 
-	FOR i IN 1..va_numbers.count
-	LOOP
-		dbms_output.put_line(va_numbers(i));
-	END LOOP;
-
+	bubblesort.print_values(v_numbers);
 END;
 /
