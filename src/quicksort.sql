@@ -1,17 +1,33 @@
 -- Work in progress
 
-DECLARE
+CREATE OR REPLACE PACKAGE qsort
+IS
 	TYPE numbers_t IS VARRAY(6) OF INTEGER;
-	numbers numbers_t := numbers_t(3, 1, 7, 5, 9, 4);
+
+	PROCEDURE print(numbers numbers_t);
+END;
+/
+
+CREATE OR REPLACE PACKAGE BODY qsort
+IS
+	PROCEDURE print(numbers numbers_t)
+	IS
+	BEGIN
+		FOR i IN numbers.FIRST..numbers.LAST LOOP
+			DBMS_OUTPUT.PUT(numbers(i));
+		END LOOP;
+		DBMS_OUTPUT.PUT_LINE('');
+	END;
+END;
+/
+
+DECLARE
+	numbers qsort.numbers_t := qsort.numbers_t(3, 1, 7, 5, 9, 4);
 	pivot INTEGER;
 	l_pointer INTEGER;
 	r_pointer INTEGER;
 BEGIN
-	-- Print numbers
-	FOR i IN numbers.FIRST..numbers.LAST LOOP
-		DBMS_OUTPUT.PUT(numbers(i));
-	END LOOP;
-	DBMS_OUTPUT.PUT_LINE('');
+	qsort.print(numbers);
 	
 	pivot := numbers.LAST;
 	r_pointer := numbers.LAST - 1;
@@ -47,11 +63,6 @@ BEGIN
 		END;
 	END IF;
 
-
-	-- Print numbers
-	FOR i IN numbers.FIRST..numbers.LAST LOOP
-		DBMS_OUTPUT.PUT(numbers(i));
-	END LOOP;
-	DBMS_OUTPUT.PUT_LINE('');
+	qsort.print(numbers);
 END;
 /
