@@ -85,11 +85,20 @@ IS
 	)
 	IS
 	BEGIN
-		IF tree(crnt_nodeid).left IS NULL THEN
-			insert_left_or_right(side, found_node, tree,
-					     crnt_nodeid, value);
+		IF side = 'l' THEN
+			IF tree(crnt_nodeid).left IS NULL THEN
+				insert_left_or_right(side, found_node, tree,
+						     crnt_nodeid, value);
+			ELSE
+				crnt_nodeid := tree(crnt_nodeid).left;
+			END IF;
 		ELSE
-			crnt_nodeid := tree(crnt_nodeid).left;
+			IF tree(crnt_nodeid).right IS NULL THEN
+				insert_left_or_right(side, found_node, tree,
+						     crnt_nodeid, value);
+			ELSE
+				crnt_nodeid := tree(crnt_nodeid).right;
+			END IF;
 		END IF;
 	END;
 	
