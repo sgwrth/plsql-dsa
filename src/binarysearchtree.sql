@@ -33,6 +33,7 @@ IS
 		crnt_nodeid	IN	INTEGER,
 		value		IN	NUMBER
 	);
+	FUNCTION find(tree IN node_table, value IN NUMBER) RETURN PLS_INTEGER;
 	PROCEDURE print_size(tree IN node_table);
 END;
 /
@@ -114,6 +115,26 @@ IS
 	END;
 
 
+	FUNCTION find(tree IN node_table, value IN NUMBER) RETURN PLS_INTEGER
+	IS
+		node_id INTEGER;
+	BEGIN
+		node_id := tree.FIRST;
+		WHILE node_id IS NOT NULL LOOP
+			IF tree(node_id).value = value THEN
+				RETURN node_id;
+			ELSE
+				IF value < tree(node_id).value THEN
+					node_id := tree(node_id).left;
+				ELSE
+					node_id := tree(node_id).right;
+				END IF;
+			END IF;
+		END LOOP;
+		RETURN NULL;
+	END;
+
+
 	PROCEDURE print_size(tree IN node_table)
 	IS
 	BEGIN
@@ -132,6 +153,9 @@ BEGIN
 	bst_pkg.insert_node(tree, -42);
 	bst_pkg.insert_node(tree, 0);
 	bst_pkg.insert_node(tree, 42);
+	bst_pkg.insert_node(tree, -404);
 	bst_pkg.print_size(tree);
+	DBMS_OUTPUT.PUT_LINE('42 found in node ' || bst_pkg.find(tree, 42));
+	DBMS_OUTPUT.PUT_LINE('-404 found in node ' || bst_pkg.find(tree, -404));
 END;
 /
