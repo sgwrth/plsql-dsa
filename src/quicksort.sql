@@ -2,10 +2,18 @@
 
 CREATE OR REPLACE PACKAGE qsort
 IS
-	TYPE nums_t IS VARRAY(6) OF INTEGER;
+	TYPE nums_t IS VARRAY(8) OF INTEGER;
 
 	PROCEDURE print(nums nums_t);
 	PROCEDURE swap(a IN OUT INTEGER, b IN OUT INTEGER);
+
+	PROCEDURE quicksort
+	(
+		nums		IN OUT	nums_t,
+		lower_bound	IN	INTEGER,
+		upper_bound	IN	INTEGER
+	);
+
 	FUNCTION partition
 	(
 		nums		IN OUT	nums_t,
@@ -37,6 +45,23 @@ IS
 	END;
 
 
+	PROCEDURE quicksort
+	(
+		nums		IN OUT	nums_t,
+		lower_bound	IN	INTEGER,
+		upper_bound	IN	INTEGER
+	)
+	IS
+		pivot INTEGER;
+	BEGIN
+		IF lower_bound < upper_bound THEN
+			pivot := partition(nums, lower_bound, upper_bound);
+			quicksort(nums, lower_bound, pivot - 1);
+			quicksort(nums, pivot + 1, upper_bound);
+		END IF;
+	END quicksort;
+
+
 	FUNCTION partition
 	(
 		nums		IN OUT	nums_t,
@@ -44,47 +69,36 @@ IS
 		upper_bound	IN	INTEGER
 	) RETURN INTEGER
 	IS
-		pivot INTEGER;
-		r_ptr INTEGER;
-		l_ptr INTEGER;
+		l_ptr INTEGER := lower_bound;
+		r_ptr INTEGER := upper_bound;
+		pivot INTEGER := nums(lower_bound);
 	BEGIN
-		pivot := upper_bound;
-		r_ptr := upper_bound - 1;
-		l_ptr := lower_bound;
+		WHILE l_ptr < r_ptr LOOP
+			WHILE nums(l_ptr) <= pivot LOOP
+				l_ptr := l_ptr + 1;
+			END LOOP;
 
 
-		WHILE nums(r_ptr) >= nums(pivot) AND r_ptr > 1 LOOP
-			r_ptr := r_ptr - 1;
+			WHILE nums(r_ptr) > pivot LOOP
+				r_ptr := r_ptr - 1;
+			END LOOP;
+
+
+			IF l_ptr < r_ptr THEN
+				swap(nums(l_ptr), nums(r_ptr));
+			END IF;
 		END LOOP;
-
-
-		WHILE nums(l_ptr) <= nums(pivot) AND l_ptr < upper_bound LOOP
-			l_ptr := l_ptr + 1;
-		END LOOP;
-
-
-		IF l_ptr < r_ptr THEN
-			swap(nums(l_ptr), nums(r_ptr));
-			swap(nums(pivot), nums(r_ptr));
-			RETURN r_ptr;
-		ELSE
-			swap(nums(pivot), nums(l_ptr));
-			RETURN l_ptr;
-		END IF;
-	END;
+		swap(nums(lower_bound), nums(r_ptr));
+		RETURN r_ptr;
+	END partition;
 END;
 /
 
 DECLARE
-	nums	qsort.nums_t := qsort.nums_t(3, 1, 7, 5, 9, 4);
-	pivot	INTEGER;
-	temp	INTEGER;
+	nums	qsort.nums_t := qsort.nums_t(3, 6, 1, 7, 5, 2, 9, 4);
 BEGIN
 	qsort.print(nums);
-	pivot := qsort.partition(nums, nums.FIRST, nums.LAST);
-	qsort.print(nums);
-	temp := qsort.partition(nums, nums.FIRST, pivot - 1);
-	temp := qsort.partition(nums, pivot + 1, nums.LAST);
+	qsort.quicksort(nums, nums.FIRST, nums.LAST);
 	qsort.print(nums);
 END;
 /
