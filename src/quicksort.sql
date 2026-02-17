@@ -1,5 +1,3 @@
--- Work in progress
-
 CREATE OR REPLACE PACKAGE qsort
 IS
 	TYPE nums_t IS VARRAY(8) OF INTEGER;
