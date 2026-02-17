@@ -5,6 +5,7 @@ IS
 	TYPE numbers_t IS VARRAY(6) OF INTEGER;
 
 	PROCEDURE print(numbers numbers_t);
+	PROCEDURE swap(a IN OUT INTEGER, b IN OUT INTEGER);
 END;
 /
 
@@ -17,6 +18,16 @@ IS
 			DBMS_OUTPUT.PUT(numbers(i));
 		END LOOP;
 		DBMS_OUTPUT.PUT_LINE('');
+	END;
+	
+
+	PROCEDURE swap(a IN OUT INTEGER, b IN OUT INTEGER)
+	IS
+		temp INTEGER;
+	BEGIN
+		temp := a;
+		a := b;
+		b := temp;
 	END;
 END;
 /
@@ -38,31 +49,12 @@ BEGIN
 	WHILE numbers(l_pointer) <= numbers(pivot) AND l_pointer <= numbers.LAST LOOP
 		l_pointer := l_pointer + 1;
 	END LOOP;
-
 	IF l_pointer < r_pointer THEN
-		DECLARE
-			temp INTEGER;
-		BEGIN
-			-- Swap l/r numbers
-			temp := numbers(l_pointer);
-			numbers(l_pointer) := numbers(r_pointer);
-			numbers(r_pointer) := temp;
-			-- Swap pivot and r number
-			temp := numbers(pivot);
-			numbers(pivot) := numbers(r_pointer);
-			numbers(r_pointer) := temp;
-		END;
+		qsort.swap(numbers(l_pointer), numbers(r_pointer));
+		qsort.swap(numbers(pivot), numbers(r_pointer));
 	ELSE
-		DECLARE
-			temp INTEGER;
-		BEGIN
-			-- Swap pivot and l number
-			temp := numbers(pivot);
-			numbers(pivot) := numbers(l_pointer);
-			numbers(l_pointer) := temp;
-		END;
+		qsort.swap(numbers(pivot), numbers(l_pointer));
 	END IF;
-
 	qsort.print(numbers);
 END;
 /
