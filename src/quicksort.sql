@@ -2,20 +2,26 @@
 
 CREATE OR REPLACE PACKAGE qsort
 IS
-	TYPE numbers_t IS VARRAY(6) OF INTEGER;
+	TYPE nums_t IS VARRAY(6) OF INTEGER;
 
-	PROCEDURE print(numbers numbers_t);
+	PROCEDURE print(nums nums_t);
 	PROCEDURE swap(a IN OUT INTEGER, b IN OUT INTEGER);
+	FUNCTION partition
+	(
+		nums		IN OUT	nums_t,
+		lower_bound	IN	INTEGER,
+		upper_bound	IN	INTEGER
+	) RETURN INTEGER;
 END;
 /
 
 CREATE OR REPLACE PACKAGE BODY qsort
 IS
-	PROCEDURE print(numbers numbers_t)
+	PROCEDURE print(nums nums_t)
 	IS
 	BEGIN
-		FOR i IN numbers.FIRST..numbers.LAST LOOP
-			DBMS_OUTPUT.PUT(numbers(i));
+		FOR i IN nums.FIRST..nums.LAST LOOP
+			DBMS_OUTPUT.PUT(nums(i));
 		END LOOP;
 		DBMS_OUTPUT.PUT_LINE('');
 	END;
@@ -29,32 +35,56 @@ IS
 		a := b;
 		b := temp;
 	END;
+
+
+	FUNCTION partition
+	(
+		nums		IN OUT	nums_t,
+		lower_bound	IN	INTEGER,
+		upper_bound	IN	INTEGER
+	) RETURN INTEGER
+	IS
+		pivot INTEGER;
+		r_ptr INTEGER;
+		l_ptr INTEGER;
+	BEGIN
+		pivot := upper_bound;
+		r_ptr := upper_bound - 1;
+		l_ptr := lower_bound;
+
+
+		WHILE nums(r_ptr) >= nums(pivot) AND r_ptr > 1 LOOP
+			r_ptr := r_ptr - 1;
+		END LOOP;
+
+
+		WHILE nums(l_ptr) <= nums(pivot) AND l_ptr < upper_bound LOOP
+			l_ptr := l_ptr + 1;
+		END LOOP;
+
+
+		IF l_ptr < r_ptr THEN
+			swap(nums(l_ptr), nums(r_ptr));
+			swap(nums(pivot), nums(r_ptr));
+			RETURN r_ptr;
+		ELSE
+			swap(nums(pivot), nums(l_ptr));
+			RETURN l_ptr;
+		END IF;
+	END;
 END;
 /
 
 DECLARE
-	numbers qsort.numbers_t := qsort.numbers_t(3, 1, 7, 5, 9, 4);
-	pivot INTEGER;
-	l_pointer INTEGER;
-	r_pointer INTEGER;
+	nums	qsort.nums_t := qsort.nums_t(3, 1, 7, 5, 9, 4);
+	pivot	INTEGER;
+	temp	INTEGER;
 BEGIN
-	qsort.print(numbers);
-	
-	pivot := numbers.LAST;
-	r_pointer := numbers.LAST - 1;
-	l_pointer := numbers.FIRST;
-	WHILE numbers(r_pointer) >= numbers(pivot) AND r_pointer >= 0 LOOP
-		r_pointer := r_pointer - 1;
-	END LOOP;
-	WHILE numbers(l_pointer) <= numbers(pivot) AND l_pointer <= numbers.LAST LOOP
-		l_pointer := l_pointer + 1;
-	END LOOP;
-	IF l_pointer < r_pointer THEN
-		qsort.swap(numbers(l_pointer), numbers(r_pointer));
-		qsort.swap(numbers(pivot), numbers(r_pointer));
-	ELSE
-		qsort.swap(numbers(pivot), numbers(l_pointer));
-	END IF;
-	qsort.print(numbers);
+	qsort.print(nums);
+	pivot := qsort.partition(nums, nums.FIRST, nums.LAST);
+	qsort.print(nums);
+	temp := qsort.partition(nums, nums.FIRST, pivot - 1);
+	temp := qsort.partition(nums, pivot + 1, nums.LAST);
+	qsort.print(nums);
 END;
 /
