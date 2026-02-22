@@ -98,5 +98,20 @@ BEGIN
 	qsort.print(nums);
 	qsort.quicksort(nums, nums.FIRST, nums.LAST);
 	qsort.print(nums);
+
+	nums := qsort.nums_t(0, 0, 0, 0, 0, 0, 0, 0);
+	qsort.print(nums);
+	qsort.quicksort(nums, nums.FIRST, nums.LAST);
+	qsort.print(nums);
+
+	nums := qsort.nums_t(1, 2, 3, 4, 5, 6, 7, 8);
+	qsort.print(nums);
+	qsort.quicksort(nums, nums.FIRST, nums.LAST);
+	qsort.print(nums);
+
+	nums := qsort.nums_t(8, 7, 6, 5, 4, 3, 2, 1);
+	qsort.print(nums);
+	qsort.quicksort(nums, nums.FIRST, nums.LAST);
+	qsort.print(nums);
 END;
 /
