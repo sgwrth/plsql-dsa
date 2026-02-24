@@ -182,8 +182,23 @@ IS
 
 	FUNCTION are_equal(p_nums_a IN t_nums, p_nums_b IN t_nums) RETURN BOOLEAN
 	IS
+		v_index_a INTEGER := p_nums_a.FIRST;
+		v_index_b INTEGER := p_nums_b.FIRST;
 	BEGIN
-		DBMS_OUTPUT.PUT_LINE('are equal');
+		IF p_nums_a.COUNT <> p_nums_b.COUNT THEN
+			RETURN FALSE;
+		END IF;
+
+		WHILE v_index_a IS NOT NULL LOOP
+			IF p_nums_a(v_index_a) <> p_nums_b(v_index_b) THEN
+				RETURN FALSE;
+			END IF;
+
+			v_index_a := p_nums_a.NEXT(v_index_a);
+			v_index_b := p_nums_b.NEXT(v_index_b);
+		END LOOP;
+
+		RETURN TRUE;
 	END;
 
 	
@@ -212,12 +227,24 @@ END;
 /
 
 DECLARE
-	nums twosum.t_nums;
+	nums	twosum.t_nums;
+	nums_a	twosum.t_nums;
+	nums_b	twosum.t_nums;
 BEGIN
 	DBMS_OUTPUT.PUT_LINE('Two Sum');
+
 	nums := twosum.t_nums(3, 6, 1, 2, 0, 7);
 	twosum.print(nums);
 	twosum.sort(nums, nums.FIRST, nums.LAST);
 	twosum.print(nums);
+
+	nums_a := twosum.t_nums(3, 6, 1, 2, 0, 7);
+	nums_b := twosum.t_nums(3, 5, 1, 2, 0, 7);
+
+	IF twosum.are_equal(nums_a, nums_b) THEN
+		DBMS_OUTPUT.PUT_LINE('are equal');
+	ELSE
+		DBMS_OUTPUT.PUT_LINE('are not equal');
+	END IF;
 END;
 /
