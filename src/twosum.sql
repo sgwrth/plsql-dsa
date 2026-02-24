@@ -4,6 +4,7 @@
 CREATE OR REPLACE PACKAGE twosum
 IS
 	TYPE t_nums IS TABLE OF INTEGER;
+	TYPE t_indices IS TABLE OF INTEGER INDEX BY BINARY_INTEGER;
 
 	FUNCTION has_twosum(p_nums IN OUT t_nums, p_sum IN INTEGER) RETURN BOOLEAN;
 
@@ -210,6 +211,9 @@ IS
 		p_value	IN INTEGER
 	) RETURN INTEGER
 	IS
+		v_indices	t_indices;
+		v_middle_idx	INTEGER := FLOOR((p_begin + p_end) / 2);
+		v_value_idx	INTEGER;
 	BEGIN
 		DBMS_OUTPUT.PUT_LINE('find');
 	END;
