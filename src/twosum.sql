@@ -212,10 +212,47 @@ IS
 	) RETURN INTEGER
 	IS
 		v_indices	t_indices;
-		v_middle_idx	INTEGER := FLOOR((p_begin + p_end) / 2);
+		v_nums_idx	INTEGER := p_nums.FIRST;
+		v_indices_idx	INTEGER := 1;
+		v_middle_idx	INTEGER;
 		v_value_idx	INTEGER;
 	BEGIN
-		DBMS_OUTPUT.PUT_LINE('find');
+		-- Empty table
+		IF p_begin = p_end THEN
+			RETURN NULL;
+		END IF;
+
+
+		-- MOVE THIS OUTSIDE OF RECURSION!
+		-- Copy p_nums indices to v_indices table
+		WHILE p_nums.EXISTS(v_nums_idx) LOOP
+			v_indices(v_indices_idx) := v_nums_idx;
+			v_nums_idx := p_nums.NEXT(v_nums_idx);
+			v_indices_idx := v_indices_idx + 1;
+		END LOOP;
+
+
+		v_middle_idx := FLOOR(
+			(
+				(v_indices(v_indices.FIRST)
+				+ v_indices(v_indices.LAST))
+				/ 2
+			)
+		);
+
+
+		-- Print v_indices values
+		DECLARE
+			i INTEGER := 1;
+		BEGIN
+			WHILE v_indices.EXISTS(i) LOOP
+				DBMS_OUTPUT.PUT_LINE(i);
+				i := i + 1;
+			END LOOP;
+		END;
+
+
+		RETURN -1;
 	END;
 
 
@@ -234,6 +271,7 @@ DECLARE
 	nums	twosum.t_nums;
 	nums_a	twosum.t_nums;
 	nums_b	twosum.t_nums;
+	temp	INTEGER;
 BEGIN
 	DBMS_OUTPUT.PUT_LINE('Two Sum');
 
@@ -250,5 +288,7 @@ BEGIN
 	ELSE
 		DBMS_OUTPUT.PUT_LINE('are not equal');
 	END IF;
+
+	temp := twosum.find(nums, nums.FIRST, nums.LAST, 1);
 END;
 /
