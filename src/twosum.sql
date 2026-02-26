@@ -6,7 +6,12 @@ IS
 	TYPE t_nums IS TABLE OF INTEGER;
 	TYPE t_indices IS TABLE OF INTEGER INDEX BY BINARY_INTEGER;
 
-	FUNCTION has_twosum(p_nums IN OUT t_nums, p_sum IN INTEGER) RETURN BOOLEAN;
+
+	FUNCTION has_twosum
+	(
+		p_nums IN OUT t_nums,
+		p_sum IN INTEGER
+	) RETURN BOOLEAN;
 
 
 	PROCEDURE sort
@@ -39,8 +44,16 @@ IS
 		p_sum	IN	INTEGER
 	) RETURN INTEGER;
 
-	FUNCTION are_equal(p_nums_a IN t_nums, p_nums_b IN t_nums) RETURN BOOLEAN;
 
+	FUNCTION are_equal
+	(
+		p_nums_a IN t_nums,
+		p_nums_b IN t_nums
+	) RETURN BOOLEAN;
+
+
+	FUNCTION extract_indices(p_nums IN t_nums) RETURN t_indices;
+	
 
 	FUNCTION find
 	(
@@ -57,7 +70,11 @@ END;
 
 CREATE OR REPLACE PACKAGE BODY twosum
 IS
-	FUNCTION has_twosum(p_nums IN OUT t_nums, p_sum IN INTEGER) RETURN BOOLEAN
+	FUNCTION has_twosum
+	(
+		p_nums IN OUT t_nums,
+		p_sum IN INTEGER
+	) RETURN BOOLEAN
 	IS
 		v_twosum_element_index	INTEGER;
 	BEGIN
@@ -181,7 +198,11 @@ IS
 	END;
 
 
-	FUNCTION are_equal(p_nums_a IN t_nums, p_nums_b IN t_nums) RETURN BOOLEAN
+	FUNCTION are_equal
+	(
+		p_nums_a IN t_nums,
+		p_nums_b IN t_nums
+	) RETURN BOOLEAN
 	IS
 		v_index_a INTEGER := p_nums_a.FIRST;
 		v_index_b INTEGER := p_nums_b.FIRST;
@@ -203,6 +224,23 @@ IS
 	END;
 
 	
+	FUNCTION extract_indices(p_nums IN t_nums) RETURN t_indices
+	IS
+		v_nums_idx	INTEGER := p_nums.FIRST;
+		v_indices	t_indices;
+		v_indices_idx	INTEGER := 1;
+	BEGIN
+		WHILE p_nums.EXISTS(v_nums_idx) LOOP
+			v_indices(v_indices_idx) := v_nums_idx;
+			v_nums_idx := p_nums.NEXT(v_nums_idx);
+			v_indices_idx := v_indices_idx + 1;
+		END LOOP;
+
+
+		RETURN  v_indices;
+	END;
+	
+
 	FUNCTION find
 	(
 		p_nums	IN t_nums,
@@ -223,21 +261,10 @@ IS
 		END IF;
 
 
-		-- MOVE THIS OUTSIDE OF RECURSION!
-		-- Copy p_nums indices to v_indices table
-		WHILE p_nums.EXISTS(v_nums_idx) LOOP
-			v_indices(v_indices_idx) := v_nums_idx;
-			v_nums_idx := p_nums.NEXT(v_nums_idx);
-			v_indices_idx := v_indices_idx + 1;
-		END LOOP;
-
-
 		v_middle_idx := FLOOR(
-			(
-				(v_indices(v_indices.FIRST)
-				+ v_indices(v_indices.LAST))
-				/ 2
-			)
+			(v_indices(v_indices.FIRST)
+			+ v_indices(v_indices.LAST))
+			/ 2
 		);
 
 
@@ -289,6 +316,6 @@ BEGIN
 		DBMS_OUTPUT.PUT_LINE('are not equal');
 	END IF;
 
-	temp := twosum.find(nums, nums.FIRST, nums.LAST, 1);
+	-- temp := twosum.find(nums, nums.FIRST, nums.LAST, 1);
 END;
 /
