@@ -52,15 +52,16 @@ IS
 	) RETURN BOOLEAN;
 
 
-	FUNCTION extract_indices(p_nums IN t_nums) RETURN t_indices;
+	FUNCTION copy_indices(p_nums IN t_nums) RETURN t_indices;
 	
 
 	FUNCTION find
 	(
-		p_nums	IN t_nums,
-		p_begin	IN INTEGER,
-		p_end	IN INTEGER,
-		p_value	IN INTEGER
+		p_nums		IN t_nums,
+		p_indices	IN t_indices,
+		p_begin		IN INTEGER,
+		p_end		IN INTEGER,
+		p_value		IN INTEGER
 	) RETURN INTEGER;
 
 
@@ -224,7 +225,7 @@ IS
 	END;
 
 	
-	FUNCTION extract_indices(p_nums IN t_nums) RETURN t_indices
+	FUNCTION copy_indices(p_nums IN t_nums) RETURN t_indices
 	IS
 		v_nums_idx	INTEGER := p_nums.FIRST;
 		v_indices	t_indices;
@@ -243,43 +244,38 @@ IS
 
 	FUNCTION find
 	(
-		p_nums	IN t_nums,
-		p_begin	IN INTEGER,
-		p_end	IN INTEGER,
-		p_value	IN INTEGER
+		p_nums		IN t_nums,
+		p_indices	IN t_indices,
+		p_begin		IN INTEGER,
+		p_end		IN INTEGER,
+		p_value		IN INTEGER
 	) RETURN INTEGER
 	IS
-		v_indices	t_indices;
 		v_nums_idx	INTEGER := p_nums.FIRST;
 		v_indices_idx	INTEGER := 1;
 		v_middle_idx	INTEGER;
 		v_value_idx	INTEGER;
 	BEGIN
-		-- Empty table
-		IF p_begin = p_end THEN
+		IF p_begin > p_end THEN
 			RETURN NULL;
 		END IF;
 
 
-		v_middle_idx := FLOOR(
-			(v_indices(v_indices.FIRST)
-			+ v_indices(v_indices.LAST))
-			/ 2
-		);
+		v_middle_idx := FLOOR((p_begin + p_end) / 2);
 
 
-		-- Print v_indices values
-		DECLARE
-			i INTEGER := 1;
-		BEGIN
-			WHILE v_indices.EXISTS(i) LOOP
-				DBMS_OUTPUT.PUT_LINE(i);
-				i := i + 1;
-			END LOOP;
-		END;
+		IF p_value = p_nums(p_indices(v_middle_idx)) THEN
+			RETURN v_middle_idx;
+		ELSIF p_value < p_nums(p_indices(v_middle_idx)) THEN
+			v_value_idx := find(p_nums, p_indices, p_begin,
+					    v_middle_idx - 1, p_value);
+		ELSE
+			v_value_idx := find(p_nums, p_indices, v_middle_idx + 1,
+					    p_end, p_value);
+		END IF;
+		
 
-
-		RETURN -1;
+		RETURN v_value_idx;
 	END;
 
 
@@ -298,14 +294,16 @@ DECLARE
 	nums	twosum.t_nums;
 	nums_a	twosum.t_nums;
 	nums_b	twosum.t_nums;
+	indices	twosum.t_indices;
 	temp	INTEGER;
+	value	INTEGER;
 BEGIN
 	DBMS_OUTPUT.PUT_LINE('Two Sum');
 
 	nums := twosum.t_nums(3, 6, 1, 2, 0, 7);
 	twosum.print(nums);
-	twosum.sort(nums, nums.FIRST, nums.LAST);
-	twosum.print(nums);
+	-- twosum.sort(nums, nums.FIRST, nums.LAST);
+	-- twosum.print(nums);
 
 	nums_a := twosum.t_nums(3, 6, 1, 2, 0, 7);
 	nums_b := twosum.t_nums(3, 5, 1, 2, 0, 7);
@@ -316,6 +314,17 @@ BEGIN
 		DBMS_OUTPUT.PUT_LINE('are not equal');
 	END IF;
 
-	-- temp := twosum.find(nums, nums.FIRST, nums.LAST, 1);
+	indices := twosum.copy_indices(nums);
+
+	temp := indices.FIRST;
+	WHILE indices.EXISTS(temp) LOOP
+		DBMS_OUTPUT.PUT_LINE(indices(temp));
+		temp := indices.NEXT(temp);
+	END LOOP;
+
+	value := 3;
+	temp := twosum.find(nums, indices, nums.FIRST, nums.LAST, value);
+
+	DBMS_OUTPUT.PUT_LINE('pos of ' || value || ': ' || temp);
 END;
 /
