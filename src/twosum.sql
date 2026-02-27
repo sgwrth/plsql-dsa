@@ -257,6 +257,7 @@ IS
 		v_value_idx	INTEGER;
 	BEGIN
 		IF p_begin > p_end THEN
+			DBMS_OUTPUT.PUT_LINE('null');
 			RETURN NULL;
 		END IF;
 
@@ -267,11 +268,17 @@ IS
 		IF p_value = p_nums(p_indices(v_middle_idx)) THEN
 			RETURN v_middle_idx;
 		ELSIF p_value < p_nums(p_indices(v_middle_idx)) THEN
-			v_value_idx := find(p_nums, p_indices, p_begin,
-					    v_middle_idx - 1, p_value);
+			v_value_idx := find(p_nums,
+					    p_indices,
+					    p_begin,
+					    v_middle_idx - 1,
+					    p_value);
 		ELSE
-			v_value_idx := find(p_nums, p_indices, v_middle_idx + 1,
-					    p_end, p_value);
+			v_value_idx := find(p_nums,
+					    p_indices,
+					    v_middle_idx + 1,
+					    p_end,
+					    p_value);
 		END IF;
 		
 
@@ -294,16 +301,13 @@ DECLARE
 	nums	twosum.t_nums;
 	nums_a	twosum.t_nums;
 	nums_b	twosum.t_nums;
-	indices	twosum.t_indices;
-	temp	INTEGER;
-	value	INTEGER;
 BEGIN
 	DBMS_OUTPUT.PUT_LINE('Two Sum');
 
 	nums := twosum.t_nums(3, 6, 1, 2, 0, 7);
 	twosum.print(nums);
-	-- twosum.sort(nums, nums.FIRST, nums.LAST);
-	-- twosum.print(nums);
+	twosum.sort(nums, nums.FIRST, nums.LAST);
+	twosum.print(nums);
 
 	nums_a := twosum.t_nums(3, 6, 1, 2, 0, 7);
 	nums_b := twosum.t_nums(3, 5, 1, 2, 0, 7);
@@ -314,17 +318,29 @@ BEGIN
 		DBMS_OUTPUT.PUT_LINE('are not equal');
 	END IF;
 
-	indices := twosum.copy_indices(nums);
 
-	temp := indices.FIRST;
-	WHILE indices.EXISTS(temp) LOOP
-		DBMS_OUTPUT.PUT_LINE(indices(temp));
-		temp := indices.NEXT(temp);
-	END LOOP;
+	DECLARE
+		indices		twosum.t_indices := twosum.copy_indices(nums);
+		indices_idx	INTEGER := indices.FIRST;
+		searched_val	INTEGER;
+		found_idx	INTEGER;
+	BEGIN
+		WHILE indices.EXISTS(indices_idx) LOOP
+			DBMS_OUTPUT.PUT_LINE(indices(indices_idx));
+			indices_idx := indices.NEXT(indices_idx);
+		END LOOP;
 
-	value := 3;
-	temp := twosum.find(nums, indices, nums.FIRST, nums.LAST, value);
+		searched_val := 7;
+		found_idx := twosum.find(nums,
+					 indices,
+					 nums.FIRST,
+					 nums.LAST,
+					 searched_val);
 
-	DBMS_OUTPUT.PUT_LINE('pos of ' || value || ': ' || temp);
+		DBMS_OUTPUT.PUT_LINE('pos of '
+				     || searched_val
+				     || ': '
+				     || found_idx);
+	END;
 END;
 /
