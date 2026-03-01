@@ -83,7 +83,7 @@ IS
 		v_twosum_element_index := find_twosum_element(p_nums, p_sum);
 
 
-		IF v_twosum_element_index <> NULL THEN
+		IF v_twosum_element_index IS NOT NULL THEN
 			RETURN TRUE;
 		ELSE
 			RETURN FALSE;
@@ -280,7 +280,6 @@ IS
 		v_value_idx	INTEGER;
 	BEGIN
 		IF p_begin > p_end THEN
-			DBMS_OUTPUT.PUT_LINE('null');
 			RETURN NULL;
 		END IF;
 
@@ -335,11 +334,11 @@ BEGIN
 
 	-- Delete all elements and re-add them, creating all new indices
 	DECLARE
-		TYPE t_idx IS VARRAY(11) OF INTEGER;
+		TYPE t_idx IS VARRAY(10) OF INTEGER;
 
 		v_idx	INTEGER	:= nums.FIRST;
 		v_last	INTEGER := nums.LAST;
-		v_vals	t_idx	:= t_idx(3, 6, 1, 2, 0, 7, -4, 9, -2, 8, -3);
+		v_vals	t_idx	:= t_idx(3, 6, 1, 2, 7, -4, 9, -2, 8, -3);
 	BEGIN
 		WHILE nums.EXISTS(v_idx) LOOP
 			nums.DELETE(v_idx);
@@ -358,8 +357,8 @@ BEGIN
 	twosum.sort(nums, nums.FIRST, nums.LAST);
 	twosum.print(nums);
 
-	nums_a := twosum.t_nums(3, 6, 1, 2, 0, 7, -4, 9, -2, 8, -3);
-	nums_b := twosum.t_nums(3, 5, 1, 2, 0, 7, -4, 9, -2, 8, -3);
+	nums_a := twosum.t_nums(3, 6, 1, 2, 7, -4, 9, -2, 8, -3);
+	nums_b := twosum.t_nums(3, 5, 1, 2, 7, -4, 9, -2, 8, -3);
 
 	IF twosum.are_equal(nums_a, nums_b) THEN
 		DBMS_OUTPUT.PUT_LINE('are equal');
@@ -368,6 +367,7 @@ BEGIN
 	END IF;
 
 
+	-- Testing the find() function
 	DECLARE
 		indices		twosum.t_indices := twosum.copy_indices(nums);
 		indices_idx	INTEGER := indices.FIRST;
@@ -375,7 +375,6 @@ BEGIN
 		found_idx	INTEGER;
 	BEGIN
 		WHILE indices.EXISTS(indices_idx) LOOP
-			DBMS_OUTPUT.PUT_LINE(indices(indices_idx));
 			indices_idx := indices.NEXT(indices_idx);
 		END LOOP;
 
@@ -390,6 +389,26 @@ BEGIN
 				     || searched_val
 				     || ': '
 				     || found_idx);
+	END;
+
+	
+	-- Testing the has_twosum() function
+	DECLARE
+		TYPE t_twosums IS VARRAY(5) OF INTEGER;
+
+		twosums t_twosums := t_twosums(15, -3, 3, 21, 7);
+	BEGIN
+		FOR i IN twosums.FIRST..twosums.LAST LOOP
+			IF twosum.has_twosum(nums, twosums(i)) THEN
+				DBMS_OUTPUT.PUT_LINE('twosum for '
+						     || twosums(i)
+						     || ': found');
+			ELSE
+				DBMS_OUTPUT.PUT_LINE('twosum for '
+						     || twosums(i)
+						     || ': not found');
+			END IF;
+		END LOOP;
 	END;
 END;
 /
