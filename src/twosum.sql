@@ -73,14 +73,16 @@ CREATE OR REPLACE PACKAGE BODY twosum
 IS
 	FUNCTION has_twosum
 	(
-		p_nums IN OUT t_nums,
-		p_sum IN INTEGER
+		p_nums	IN OUT	t_nums,
+		p_sum	IN	INTEGER
 	) RETURN BOOLEAN
 	IS
-		v_twosum_element_index	INTEGER;
+		v_twosum_element_index INTEGER;
 	BEGIN
 		sort(p_nums, p_nums.FIRST, p_nums.LAST);		
 		v_twosum_element_index := find_twosum_element(p_nums, p_sum);
+
+
 		IF v_twosum_element_index <> NULL THEN
 			RETURN TRUE;
 		ELSE
@@ -194,8 +196,29 @@ IS
 		p_sum	IN	INTEGER
 	) RETURN INTEGER
 	IS
+		v_index		INTEGER := p_nums.FIRST;
+		complement	INTEGER;
+		complement_idx	INTEGER;
+		indices		t_indices;
 	BEGIN
-		DBMS_OUTPUT.PUT_LINE('find twosum element');
+		WHILE p_nums.EXISTS(v_index) LOOP
+			complement := p_sum - p_nums(v_index);
+			indices := copy_indices(p_nums);
+			complement_idx := find(p_nums,
+					      indices,
+					      indices.FIRST,
+					      indices.LAST,
+					      complement);
+			IF complement_idx IS NOT NULL THEN
+				RETURN complement_idx;
+			END IF;
+
+
+			v_index := p_nums.NEXT(v_index);
+		END LOOP;
+
+
+		RETURN NULL;
 	END;
 
 
@@ -288,9 +311,13 @@ IS
 
 	PROCEDURE print(nums IN t_nums)
 	IS
+		v_index INTEGER := nums.FIRST;
 	BEGIN
-		FOR i IN nums.FIRST..nums.LAST LOOP
-			DBMS_OUTPUT.PUT(nums(i));
+		WHILE nums.EXISTS(v_index) LOOP
+			DBMS_OUTPUT.PUT('[');
+			DBMS_OUTPUT.PUT(nums(v_index));
+			DBMS_OUTPUT.PUT(']');
+			v_index := nums.NEXT(v_index);
 		END LOOP;
 		DBMS_OUTPUT.PUT_LINE('');
 	END;
@@ -303,14 +330,36 @@ DECLARE
 	nums_b	twosum.t_nums;
 BEGIN
 	DBMS_OUTPUT.PUT_LINE('Two Sum');
+	nums := twosum.t_nums(3, 6, 1, 2, 0, 7, -4, 9, -2, 8, -3);
 
-	nums := twosum.t_nums(3, 6, 1, 2, 0, 7);
+
+	-- Delete all elements and re-add them, creating all new indices
+	DECLARE
+		TYPE t_idx IS VARRAY(11) OF INTEGER;
+
+		v_idx	INTEGER	:= nums.FIRST;
+		v_last	INTEGER := nums.LAST;
+		v_vals	t_idx	:= t_idx(3, 6, 1, 2, 0, 7, -4, 9, -2, 8, -3);
+	BEGIN
+		WHILE nums.EXISTS(v_idx) LOOP
+			nums.DELETE(v_idx);
+			v_idx := nums.NEXT(v_idx);
+		END LOOP;
+
+
+		FOR i IN v_vals.FIRST..v_vals.LAST LOOP
+			nums.EXTEND;
+			nums(nums.LAST) := v_vals(i);
+		END LOOP;
+	END;
+
+
 	twosum.print(nums);
 	twosum.sort(nums, nums.FIRST, nums.LAST);
 	twosum.print(nums);
 
-	nums_a := twosum.t_nums(3, 6, 1, 2, 0, 7);
-	nums_b := twosum.t_nums(3, 5, 1, 2, 0, 7);
+	nums_a := twosum.t_nums(3, 6, 1, 2, 0, 7, -4, 9, -2, 8, -3);
+	nums_b := twosum.t_nums(3, 5, 1, 2, 0, 7, -4, 9, -2, 8, -3);
 
 	IF twosum.are_equal(nums_a, nums_b) THEN
 		DBMS_OUTPUT.PUT_LINE('are equal');
@@ -330,11 +379,11 @@ BEGIN
 			indices_idx := indices.NEXT(indices_idx);
 		END LOOP;
 
-		searched_val := 7;
+		searched_val := -2;
 		found_idx := twosum.find(nums,
 					 indices,
-					 nums.FIRST,
-					 nums.LAST,
+					 indices.FIRST,
+					 indices.LAST,
 					 searched_val);
 
 		DBMS_OUTPUT.PUT_LINE('pos of '
